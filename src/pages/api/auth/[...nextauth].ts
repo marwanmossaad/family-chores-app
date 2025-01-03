@@ -1,11 +1,9 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { PrismaAdapter } from '@next-auth/prisma-adapter'
-import { prisma } from '@/lib/prisma'
 import { compare } from 'bcryptjs'
+import { prisma } from '@/lib/prisma'
 
 export default NextAuth({
-  adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -28,9 +26,9 @@ export default NextAuth({
           throw new Error('User not found')
         }
 
-        const isValid = await compare(credentials.password, user.password)
+        const isPasswordValid = await compare(credentials.password, user.password)
 
-        if (!isValid) {
+        if (!isPasswordValid) {
           throw new Error('Invalid password')
         }
 
@@ -44,12 +42,8 @@ export default NextAuth({
       }
     })
   ],
-  session: {
-    strategy: 'jwt'
-  },
   pages: {
     signIn: '/auth/login',
-    signUp: '/auth/register'
   },
   callbacks: {
     async session({ session, token }) {
@@ -67,5 +61,8 @@ export default NextAuth({
       }
       return token
     }
+  },
+  session: {
+    strategy: 'jwt'
   }
 })
